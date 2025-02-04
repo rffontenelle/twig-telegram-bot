@@ -1,0 +1,14 @@
+name: Test
+
+on: [workflow_dispatch]
+
+permissions:
+  contents: read-only
+  
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: pip install beautifulsoup4
+      - run: python ./get_twig.py
