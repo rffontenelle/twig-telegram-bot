@@ -3,7 +3,7 @@ name: Test
 on: [workflow_dispatch]
 
 permissions:
-  contents: read-only
+  contents: read
   
 jobs:
   test:
