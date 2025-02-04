@@ -12,3 +12,6 @@ jobs:
       - uses: actions/checkout@v4
       - run: pip install beautifulsoup4
       - run: python ./get_twig.py
+        env:
+          BOT_TOKEN: ${{ secrets.BOT_TOKEN }}
+          CHAT_ID: ${{ secrets.CHAT_ID }}
