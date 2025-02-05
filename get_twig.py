@@ -95,9 +95,9 @@ def prepare_text_for_sending(title: str, headers: str, url: str) -> str:
     for header in headers:
         content = f"[{escape_markdown_v2(header['content'])}]({url}#{header['id']})"
         if header["type"] == "h1":
-            text += f"\\\n\- {content}"
+            text += f"\\\n\\\n{content}"
         elif header["type"] == "h3":
-            text += f"\\\n   \- {content}"
+            text += f"\\\n• {content}"
     return text
 
 
@@ -105,7 +105,7 @@ def send_telegram_message(bot_token: str, chat_id: str, text: str):
     """Send a text message to a Telegram chat."""
     try:
         url = f"{TELEGRAM_API_BASE}{bot_token}/sendMessage"
-        payload = {"chat_id": chat_id, "text": text, "parse_mode": "MarkdownV2", "disable_web_page_preview": True}
+        payload = {"chat_id": chat_id, "text": text, "parse_mode": "MarkdownV2"}
         response = requests.post(url, data=payload)
         response.raise_for_status()
         print("Message sent successfully!")
@@ -161,8 +161,8 @@ def main():
     #print(text)
     #print(f"# of chars: {len(text)}")
 
-    send_message_filtering_large_text(BOT_TOKEN, CHAT_ID, text)
     send_telegram_images(BOT_TOKEN, CHAT_ID, image_urls)
+    send_message_filtering_large_text(BOT_TOKEN, CHAT_ID, text)
 
 
 if __name__ == "__main__":
