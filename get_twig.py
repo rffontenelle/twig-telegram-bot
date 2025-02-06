@@ -4,10 +4,14 @@ import os
 import re
 import requests
 import textwrap
+import logging
 import xml.etree.ElementTree as ET
 from pprint import pprint
 
 from bs4 import BeautifulSoup
+
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 # Constants
 RSS_FEED_URL = "https://thisweek.gnome.org/index.xml"
@@ -29,7 +33,7 @@ def fetch_rss_content(url: str) -> str:
         response.raise_for_status()
         return response.content
     except requests.RequestException as e:
-        print(f"Error fetching RSS feed: {e}")
+        logger.error(f"Error fetching RSS feed: {e}")
         return None
 
 
@@ -40,7 +44,7 @@ def get_latest_post_url(xml_content: str) -> str:
         item = root.find(".//item/link")
         return item.text if item is not None else None
     except ET.ParseError as e:
-        print(f"Error parsing XML: {e}")
+        logger.error(f"Error parsing XML: {e}")
         return None
 
 
@@ -51,7 +55,7 @@ def fetch_post_content(url: str) -> BeautifulSoup:
         response.raise_for_status()
         return BeautifulSoup(response.content, "html.parser")
     except requests.RequestException as e:
-        print(f"Error fetching post content: {e}")
+        logger.error(f"Error fetching post content: {e}")
         return None
 
 
@@ -80,7 +84,7 @@ def send_images_with_caption(bot_token, chat_id, image_urls, caption):
     Sends multiple images to a Telegram chat with a caption on the first image.
     """
     if not image_urls:
-        print("No images to send.")
+        logger.error("No images to send.")
         return
 
     telegram_api_url = f"https://api.telegram.org/bot{bot_token}/sendMediaGroup"
@@ -101,9 +105,9 @@ def send_images_with_caption(bot_token, chat_id, image_urls, caption):
     # Send the media group request
     try:
         requests.post(telegram_api_url, json=payload)
-        print("Images sent successfully!")
+        logger.info("Images sent successfully!")
     except requests.RequestException as e:
-        print(f"Error sending images: {e}")
+        logger.error(f"Error sending images: {e}")
 
 
 def main():
@@ -113,7 +117,7 @@ def main():
 
     post_url = get_latest_post_url(xml_content)
     if not post_url:
-        print("No post URL found.")
+        logger.error("No post URL found.")
         return
 
     soup = fetch_post_content(post_url)
@@ -122,13 +126,13 @@ def main():
 
     post_title, image_urls = extract_post_data(soup, post_url)
 
-    #print(f"post_title: {post_title}")
-    #print(f"image_urls: {image_urls}")
+    logger.debug(f"post_title: {post_title}")
+    logger.debug(f"image_urls: {image_urls}")
 
     caption = prepare_caption(post_title, post_url)
 
-    #print(text)
-    #print(f"# of chars: {len(text)}")
+    logger.debug(caption)
+    logger.debug(f"# of chars: {len(caption)}")
 
     send_images_with_caption(BOT_TOKEN, CHAT_ID, image_urls, caption)
 
